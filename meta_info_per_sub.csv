@@ -1,0 +1,2 @@
+subject_id,pas_mask_file_path,white_matter_mask_file_path,grey_matter_mask_file_path
+HCA6002236,/Users/chen/Desktop/code/HCA6002236_data/PVS_HCA6002236_instances.nii.gz,/Users/chen/Desktop/code/HCA6002236_data/HCA6002236_wm_2.nii.gz,/Users/chen/Desktop/code/HCA6002236_data/HCA6002236_outside3.nii.gz
