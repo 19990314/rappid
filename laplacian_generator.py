@@ -61,14 +61,17 @@ with open(args.log, mode="w", newline="") as log_file:
             seg_in = np.array(inner_boudary.get_fdata())
             seg_target = np.array(target.get_fdata())
 
-            # count voxels/pas
-            unique_labels_in = np.unique(seg_in)
-            counts = {label: np.sum(seg_in == label) for label in unique_labels_in}
+            # count voxels per pas
+            unique_labels_in = np.unique(seg_in)  #seg_in: the T2 data saved in Numpy obj
+            counts = {label: np.sum(seg_in == label) for label in unique_labels_in} # count voxels for each pas
             counts_df = pd.DataFrame(list(counts.items()), columns=["PAS index", "voxel count"])
-            counts_df.to_csv("voxel_count_per_pas_"+sample+".csv", index=False)
+            counts_df.to_csv("voxel_count_per_pas_"+sample+".csv", index=False) # output counts
 
+            # keep PASs larger than 4-voxels
             filtered_indices = counts_df.loc[counts_df["voxel count"] > 4, "PAS index"]
-            pas_indices = filtered_indices.astype(int).tolist()
+            pas_indices = filtered_indices.astype(int).tolist() # get the PAS labels, save into a list
+
+            # calculate laplacian field
             laplacian_updated(output_path, sample, seg_out, seg_in, seg_target, pas_indices, target.affine,target.header, global_pas=True)
 
             # Record successful processing

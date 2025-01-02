@@ -166,10 +166,10 @@ seg_in = np.array(inner_boudary.get_fdata())
 seg_target = np.array(target.get_fdata())
 
 # count pas voxels
-unique_labels_in = np.unique(seg_in)
+unique_labels_in = np.unique(seg_in) #seg_in: the T2 data saved in Numpy obj
 counts = {label: np.sum(seg_in == label) for label in unique_labels_in}
 counts_df = pd.DataFrame(list(counts.items()), columns=["PAS index", "voxel count"])
-#counts_df.to_csv("voxel_count_per_pas_"+sample+".csv", index=False)
+counts_df.to_csv("voxel_count_per_pas_"+sample+".csv", index=False)
 
 # -
 filtered_indices = counts_df.loc[counts_df["voxel count"] > 4, "PAS index"]
