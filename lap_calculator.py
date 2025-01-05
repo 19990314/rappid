@@ -32,7 +32,7 @@ def laplacian_updated(root_path, sample, seg_out, seg_in, seg_target, pas_index,
     # sphere to GM surface
     # outside white mater == grey matter + brain boarder
     #mask_out = (seg_out == 0) | (seg_out == 2) | (seg_out == 3) | (seg_out == 4)
-    mask_out = (seg_out == 3) | (seg_out == 4)
+    mask_out = seg_out == 3
     #mask_out = (seg_out == 0) | (seg_out == 1) |(seg_out == 2) | (seg_out == 3) | (seg_out == 4) | (seg_out == 5) |(seg_out == 6)
     grid[mask_out]=0
 
@@ -44,7 +44,8 @@ def laplacian_updated(root_path, sample, seg_out, seg_in, seg_target, pas_index,
     grid[mask_in]=10
 
     # target for laplacian = white mater
-    mask_lap = (seg_target == 0) | (seg_target == 1) | (seg_target == 2) | (seg_target == 3) | (seg_target == 4) | (seg_target == 5) | (seg_target == 6)
+    #mask_lap = (seg_target == 0) | (seg_target == 1) | (seg_target == 2) | (seg_target == 3) | (seg_target == 4) | (seg_target == 5) | (seg_target == 6)
+    mask_lap = seg_target == 2
     grid[mask_lap] = 5
 
     mask_lap_sum = np.sum(mask_lap)
@@ -52,7 +53,7 @@ def laplacian_updated(root_path, sample, seg_out, seg_in, seg_target, pas_index,
     iters = 0
     err_i = 100000
 
-    while iters<=5:
+    while iters<=5000:
         grid_updated = convolve(grid,kern, mode='constant')
         # Boundary conditions (neumann)
         # grid_updated = neumann(grid_updated)
@@ -61,7 +62,7 @@ def laplacian_updated(root_path, sample, seg_out, seg_in, seg_target, pas_index,
         grid_updated[mask_in] = 10
         # See what error is between consecutive arrays
         err_i = np.sum((grid-grid_updated)**2)/mask_lap_sum
-        print(iters,err_i)
+        #print(iters,err_i)
         err.append(err_i)
         grid = grid_updated
         iters+=1

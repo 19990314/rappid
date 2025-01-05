@@ -103,12 +103,9 @@ def laplacian_visualization(t2_affine, mask_data, laplacian_file, pas_index, sub
 
 
 # ============================= inputs =============================
-root_path = "//"
+root_path = "/Users/chen/Desktop/code/data"
 subject_id = "HCA6002236"
 #subject_id = "HCA6086470"
-
-
-
 
 # T2-weighted MRI file
 t2_file = root_path + "/" + subject_id + "_data/PVS_" + subject_id + "_0001.nii.gz"
@@ -123,11 +120,12 @@ mask_file = root_path + "/" + subject_id + "_data/PVS_" + subject_id + "_instanc
 mask_nii = nib.load(mask_file)
 mask_data = np.array(mask_nii.get_fdata())
 
-global_laplacian = False
-
+global_laplacian = True
 for i in range(1, 11):
     if global_laplacian:
-        laplacian_file = root_path + subject_id + "/" + subject_id + "_PAS_global_laplacian.nii.gz"
+        #laplacian_file = root_path + subject_id + "/" + subject_id + "_PAS_global_laplacian.nii.gz"
+        laplacian_file = "/Users/chen/Desktop/code/output_from_pipeline/laplacian/HCA6002236_PAS_global_laplacian.nii.gz"
+        #laplacian_file = "/Users/chen/Desktop/code/data/HCA6002236/HCA6002236_PAS_global_laplacian.nii.gz"
         laplacian_visualization(t2_affine, mask_data, laplacian_file, i, subject_id, global_laplacian)
     else:
         laplacian_file = root_path + subject_id + "/" + subject_id + "_pas" + str(i)+ ".nii.gz"

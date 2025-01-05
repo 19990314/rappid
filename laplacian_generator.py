@@ -11,7 +11,7 @@ from scipy.ndimage import convolve, generate_binary_structure
 import nibabel as nib
 from lap_calculator import *
 
-# Import the laplacian function from laplacian.py
+# Import the laplacian function from lap_calculator.py
 #laplacian_module = importlib.import_module("laplacian")  # Ensure laplacian.py is in the same directory
 #laplacian = getattr(laplacian_module, "laplacian_updated")
 
@@ -19,13 +19,13 @@ from lap_calculator import *
 parser = argparse.ArgumentParser(description="Process subjects using the laplacian function.")
 parser.add_argument(
     "--input",
-    default="meta_info_per_sub.csv",
-    help="Path to the CSV file containing subject information. Default is 'meta_info_per_sub.csv'."
+    default="NA",
+    help="Path to the CSV file containing subject information. Please check through '/ifs/loni/faculty/hkim/shuting/code/output_from_pipeline/meta_file_tracker.csv'."
 )
 parser.add_argument(
-    "--log",
-    default="laplacian_log.csv",
-    help="Path to save the log of processing times for each subject. Default is 'laplacian_log.csv'."
+    "--time_log",
+    default="time_book.csv",
+    help="Path to save the log of processing times for each subject. Default is 'time_log.csv'."
 )
 
 # Parse arguments
@@ -38,9 +38,9 @@ with open(args.input, mode="r") as file:
 
 # Log file initialization
 log_headers = ["subject_id", "time_used", "status"]
-output_path = os.getcwd() + "/output_from_pipeline/"
+output_path = os.getcwd() + "/output_from_pipeline/laplacian/"
 
-with open(args.log, mode="w", newline="") as log_file:
+with open(args.time_log, mode="w", newline="") as log_file:
     log_writer = csv.DictWriter(log_file, fieldnames=log_headers)
     log_writer.writeheader()
 
@@ -77,7 +77,7 @@ with open(args.log, mode="w", newline="") as log_file:
             # Record successful processing
             time_used = round(time.time() - start_time, 2)
             log_writer.writerow({"subject_id": sample, "time_used": time_used, "status": "success"})
-            print(f"Subject {sample} processed successfully in {time_used} seconds.")
+            print(f"Subject {sample} done.")
 
         except Exception as e:
             # Handle errors and log them
