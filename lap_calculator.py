@@ -7,6 +7,8 @@ from scipy.ndimage import convolve, generate_binary_structure
 import nibabel as nib
 import plotly.graph_objects as go
 import argparse
+#HCA6002236,/Users/chen/Downloads/PVS_HCA6002236_ref_labels_instances.nii.gz,/Users/chen/Downloads/HCA6002236_wm_2.nii.gz,/Users/chen/Downloads/HCA6002236_outside3_final.nii.gz
+
 
 # Code modified code by Shuting
 def laplacian_updated(root_path, sample, seg_out, seg_in, seg_target, pas_index, affine, header, global_pas):

@@ -35,7 +35,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--output_dir",
-    default="NA",
+    default="/ifs/loni/faculty/hkim/shuting/code/output_from_pipeline/",
     help="Path to save the laplacians"
 )
 
@@ -64,9 +64,10 @@ try:
     unique_labels_in = np.unique(seg_in)  # seg_in: the T2 data saved in Numpy obj
     counts = {label: np.sum(seg_in == label) for label in unique_labels_in}  # count voxels for each pas
     counts_df = pd.DataFrame(list(counts.items()), columns=["PAS index", "voxel count"])
-    counts_df.to_csv("voxel_count_per_pas_" + sample + ".csv", index=False)  # output counts
+    counts_df.to_csv(args.output_dir + "voxel_count_per_pas_" + sample + ".csv", index=False)  # output counts
 
     # keep PASs larger than 4-voxels
+    counts_df = counts_df[counts_df["PAS index"] != 0]
     filtered_indices = counts_df.loc[counts_df["voxel count"] > 4, "PAS index"]
     pas_indices = filtered_indices.astype(int).tolist()  # get the PAS labels, save into a list
 
