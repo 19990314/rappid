@@ -12,6 +12,7 @@ from scipy.ndimage import gaussian_filter
 from scipy.ndimage import median_filter
 from scipy.ndimage import binary_dilation
 import pandas as pd
+from sklearn.decomposition import PCA
 
 
 def get_laplacian_gradient(laplacian_file):
@@ -43,20 +44,91 @@ def get_voxel_indices(file_path, min_vox):
     return ct[(ct["voxel count"] > min_vox) & (ct["PAS index"] != 0)]["PAS index"].tolist()
 
 
+def extract_perpendicular_vectors(mask_data, pas_index, gradient):
+    x_pas = []
+    y_pas = []
+    z_pas = []
+    x_wrap = []
+    y_wrap = []
+    z_wrap = []
+    lap_x = []
+    lap_y = []
+    lap_z = []
+
+    for i in pas_index:
+        PVS_volume = np.zeros(mask_data.shape)
+        PVS_volume[mask_data == i] = 1
+        dilated_mask = binary_dilation(PVS_volume, iterations=1)
+        surrounding_layer = dilated_mask - PVS_volume
+
+        # process the pas voxels
+        coords = np.argwhere(PVS_volume)
+        for coord in coords:
+            x_i, y_i, z_i = coord  # Unpack the PVS coordinates
+            x_pas.append(x_i)
+            y_pas.append(y_i)
+            z_pas.append(z_i)
+
+        PVS_label = np.nonzero(mask_data == i)
+        pvs_indices = np.asarray(PVS_label)
+        pvs_coords = pvs_indices.T
+        pca = PCA(n_components=3)
+        pca.fit(pvs_coords)
+        # Get the first principal component
+        first_pc = pca.components_[0]
+
+        # process the 1-voxel-away space
+        coords = np.argwhere(surrounding_layer)
+        for coord in coords:
+            x_i, y_i, z_i = coord
+            x_wrap.append(x_i)
+            y_wrap.append(y_i)
+            z_wrap.append(z_i)
+            lap_vec = np.array([
+                -gradient[0][x_i, y_i, z_i],
+                -gradient[1][x_i, y_i, z_i],
+                -gradient[2][x_i, y_i, z_i]
+            ]) # Compute Laplacian components
+            magnitude = np.linalg.norm(lap_vec) # calculate magnitute of the vector
+            if magnitude > 1e-6:  # Avoid division by zero
+                lap_vec_unit = lap_vec / magnitude # Make it a unit vector
+            else:
+                lap_vec_unit = np.array([0.0, 0.0, 0.0])  # Handle zero-magnitude case
+
+            # vector angle thresholds
+            cos_lower = -np.sqrt(2) / 2  # -0.707
+            cos_upper =  np.sqrt(2) / 2  #  0.707
+            # calculate the angels
+            cos_theta = np.dot(first_pc, lap_vec_unit)
+
+            if cos_lower <= cos_theta <= cos_upper:
+                #print(f"The angle between first_pc and lap_vec_unit is within the range [{np.arccos(cos_upper)}, {np.arccos(cos_lower)}] radians.")
+                lap_x.append(-gradient[0][x_i, y_i, z_i])
+                lap_y.append(-gradient[1][x_i, y_i, z_i])
+                lap_z.append(-gradient[2][x_i, y_i, z_i])
+            else:
+                lap_x.append(0)
+                lap_y.append(0)
+                lap_z.append(0)
+    return x_pas, y_pas, z_pas, x_wrap, y_wrap, z_wrap, lap_x, lap_y, lap_z
+
+
 def laplacian_visualization(mask_data, laplacian_file, pas_index, subject, plot_settings):
+    # calculate gradient
     gradient = get_laplacian_gradient(laplacian_file)
+
+    # get the pas masks
     if plot_settings["global_laplacian"]:
-        mask_in = np.isin(mask_data, pas_index)
+        mask_in = np.isin(mask_data, pas_index) # a list of PASs
     else:
-        mask_in = mask_data == pas_index # pas
+        mask_in = mask_data == pas_index # single pas
 
     # dilate the voxels
-    #mask_in = mask_data == pas_index
     #dilated_mask = binary_dilation(mask_in)
     dilated_mask = binary_dilation(mask_in, iterations=1)
     surrounding_layer = dilated_mask & ~mask_in
 
-    # Get the coordinates of the elements where mask_data == 1
+    # Get the coordinates of the pas voxels
     coords = np.argwhere(mask_in)
     x_pas = []
     y_pas = []
@@ -83,6 +155,10 @@ def laplacian_visualization(mask_data, laplacian_file, pas_index, subject, plot_
         lap_x.append(-gradient[0][x_i,y_i,z_i])
         lap_y.append(-gradient[1][x_i,y_i,z_i])
         lap_z.append(-gradient[2][x_i,y_i,z_i])
+
+    # if we need to filter vectors by angles
+    if plot_settings["FLAG_filter_by_angles"]:
+        x_pas, y_pas, z_pas, x_wrap, y_wrap, z_wrap, lap_x, lap_y, lap_z = extract_perpendicular_vectors(mask_data, pas_index, gradient)
 
 
     # =================== visualization ===================
@@ -141,7 +217,8 @@ plot_settings = {
     "boarder_voxel_size": 3,
     "arrow_len": 0.9,
     "arrow_width": 0.4,
-    "title": subject_id + "\nall the PASs with voxels > 4"
+    "title": subject_id + "\nall the PASs with voxels > 4",
+    "FLAG_filter_by_angles": True
 }
 
 if plot_settings["global_laplacian"]:
