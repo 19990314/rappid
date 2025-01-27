@@ -9,7 +9,6 @@ import csv
 import time
 import os
 
-output_file = "/ifs/loni/faculty/hkim/shuting/code/output_from_pipeline/meta_file_tracker2.csv"
 
 # Define the command-line argument parser
 parser = argparse.ArgumentParser(description="Generate a CSV file with subject information.")
@@ -20,7 +19,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--output",
-    default=output_file,
+    default="/ifs/loni/faculty/hkim/shuting/code/output_from_pipeline/meta_file_tracker2.csv",
     help="Path to save the output CSV file. Default is 'output.csv'."
 )
 parser.add_argument(
@@ -57,8 +56,8 @@ def filename_distributer(subject_id, wm_dir, outside_dir, pas_dir, project_name)
     elif project_name == "ADNI":
         file1 = os.path.join(outside_dir, f"{subject_id}/{subject_id}_outside3_final.nii.gz")
         file2 = os.path.join(wm_dir, f"{subject_id}/{subject_id}_wm_2.nii.gz")
-        file3a = os.path.join(pas_dir, f"normalized_{subject_id}_.nii.gz")
-        file3b = os.path.join(pas_dir, f"normalized_{subject_id}_.nii.gz")
+        file3a = os.path.join(pas_dir, f"normalized_{subject_id}__instances.nii.gz")
+        file3b = os.path.join(pas_dir, f"normalized_{subject_id}__instances.nii.gz")
 
     return file1, file2, file3a, file3b
 

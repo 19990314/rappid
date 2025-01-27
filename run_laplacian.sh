@@ -2,16 +2,6 @@
 echo "============************ Step 0: Assigning global variables ****************========="
 proj_root=/ifs/loni/faculty/hkim/shuting/code/
 
-# section A: ADNI project
-project_name=ADNI
-output_file_path=${proj_root}output_from_pipeline_ADNI/
-subject_file_path=/ifs/loni/faculty/hkim/hedong/DTI_NODDI/listfile/adni_114jmp.txt
-wm_dir=/ifs/loni/faculty/hkim/hedong/DTI_NODDI/ADNI3/CIVET_out/
-outsidedir=/ifs/loni/faculty/hkim/hedong/DTI_NODDI/ADNI3/CIVET_out/
-pas_dir=/ifs/loni/faculty/hkim/hedong/DTI_NODDI/ADNI3/nnUNet_raw/ADNI_T1_pred_002_union/
-meta_file_path=${proj_root}output_from_pipeline/meta_file_tracker_ADNI.csv
-timebook_name=time_book_ADNI.csv
-
 # section B: HCP project
 project_name=HCP
 output_file_path=${proj_root}output_from_pipeline/
@@ -21,6 +11,16 @@ outsidedir=/ifs/loni/faculty/hkim/yaqiong/HCP-A-CIVET2/
 pas_dir=/ifs/loni/faculty/hkim/hedong/HCP_A_PVS_label/prediction_label/PVS_instance_3_396/
 meta_file_path=${proj_root}output_from_pipeline/meta_file_tracker2.csv
 timebook_name=time_book2.csv
+
+# section A: ADNI project
+project_name=ADNI
+output_file_path=${proj_root}output_from_pipeline_ADNI/
+subject_file_path=/ifs/loni/faculty/hkim/hedong/DTI_NODDI/listfile/adni_114jmp.txt
+wm_dir=/ifs/loni/faculty/hkim/hedong/DTI_NODDI/ADNI3/CIVET_out/
+outsidedir=/ifs/loni/faculty/hkim/hedong/DTI_NODDI/ADNI3/CIVET_out/
+pas_dir=/ifs/loni/faculty/hkim/hedong/DTI_NODDI/ADNI3/nnUNet_raw/ADNI_T1_pred_002_union_instance/
+meta_file_path=${output_file_path}meta_file_tracker_ADNI.csv
+timebook_name=time_book_ADNI.csv
 
 # just switch the section of your target project to the bottom so the variables will be overwritten
 
@@ -36,10 +36,10 @@ echo "Log file for jobs from: $(date +"%M:%D:%H:%M:%S")"
 
 
 echo "============************ Step 2: Check subjects and file existence ****************========="
-#python3 ${proj_root}code/meta_info_generator.py --check_file_paths --subject_input ${subject_file_path} --wm_dir ${wm_dir} --outside_dir ${outsidedir} --pas_dir ${pas_dir} --output ${meta_file_path} --project_name ${project_name}
+python3 ${proj_root}code/meta_info_generator.py --check_file_paths --subject_input ${subject_file_path} --wm_dir ${wm_dir} --outside_dir ${outsidedir} --pas_dir ${pas_dir} --output ${meta_file_path} --project_name ${project_name}
 
 echo "=============************ Step 3: Generate Meta file ****************=================="
-#python3 ${proj_root}code/meta_info_generator.py --subject_input ${subject_file_path} --wm_dir ${wm_dir} --outside_dir ${outsidedir} --pas_dir ${pas_dir} --output ${meta_file_path} --project_name ${project_name}
+python3 ${proj_root}code/meta_info_generator.py --subject_input ${subject_file_path} --wm_dir ${wm_dir} --outside_dir ${outsidedir} --pas_dir ${pas_dir} --output ${meta_file_path} --project_name ${project_name}
 
 echo "=============************ Step 4: Prepare time book and log file ****************=================="
 if [ -e "${output_file_path}${timebook_name}" ]; then
@@ -55,9 +55,9 @@ if [ ! -d "${output_file_path}voxel_counts/" ]; then
 fi
 
 echo "=============************* Step 5: Run Laplacian *******************================"
-#for x in `cat ${subject_file_path}`
-for x in `cut -d',' -f1 /ifs/loni/faculty/hkim/shuting/code/output_from_pipeline/meta_file_tracker2.csv | tail -n +2`
+for x in `cat ${subject_file_path}`
+#for x in `cut -d',' -f1 /ifs/loni/faculty/hkim/shuting/code/output_from_pipeline/meta_file_tracker2.csv | tail -n +2`
 do
 #qsub -q runnow.q -j y -o ${output_file_path}log/log_${x} -N ${x} ${proj_root}code/single_laplacian.sh ${x} ${proj_root} ${output_file_path}
-qsub -q runnow.q -j y -o ${output_file_path}${project_name}_log -N ${x} ${proj_root}code/single_laplacian.sh ${x} ${proj_root} ${output_file_path}  ${meta_file_path} ${timebook_name}
+qsub -q runnow.q -j y -o ${output_file_path}${project_name}_log -N A${x} ${proj_root}code/single_laplacian.sh ${x} ${proj_root} ${output_file_path} ${meta_file_path} ${timebook_name}
 done
