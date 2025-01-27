@@ -7,6 +7,8 @@ from scipy.ndimage import convolve, generate_binary_structure
 import nibabel as nib
 import plotly.graph_objects as go
 import argparse
+import os
+
 #HCA6002236,/Users/chen/Downloads/PVS_HCA6002236_ref_labels_instances.nii.gz,/Users/chen/Downloads/HCA6002236_wm_2.nii.gz,/Users/chen/Downloads/HCA6002236_outside3_final.nii.gz
 
 
@@ -72,8 +74,14 @@ def laplacian_updated(root_path, sample, seg_out, seg_in, seg_target, pas_index,
     img_lap = nib.Nifti1Image(grid.reshape(I,J,K).astype(np.float32), affine,header)
     # nib.save(img_lap,PATH1+id+f'/Laplacian_L_new.nii')
     #print("PAS #" + str(pas_index) + ": done")
-    if global_pas:
-        nib.save(img_lap, root_path+sample+"_PAS_global_laplacian.nii.gz")
-    else:
-        nib.save(img_lap, root_path+sample+"_pas"+str(pas_index)+".nii.gz")
 
+    if global_pas:
+        laplacian_output_file_path = root_path+sample+"_PAS_global_laplacian.nii.gz"
+    else:
+        laplacian_output_file_path = root_path+sample+"_pas"+str(pas_index)+".nii.gz"
+
+    nib.save(img_lap, laplacian_output_file_path)
+    print(f"{sample}: laplacian done, file saved at : {laplacian_output_file_path}")
+    file_size = os.path.getsize(laplacian_output_file_path)
+    file_size_mb = file_size / (1024 * 1024) #MB format
+    print(f"{sample}: laplacian done, file saved at : {laplacian_output_file_path}, file size: {file_size_mb:.2f} MB")

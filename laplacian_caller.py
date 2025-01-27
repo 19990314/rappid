@@ -25,23 +25,30 @@ parser.add_argument(
 
 parser.add_argument(
     "--meta",
-    default='/ifs/loni/faculty/hkim/shuting/code/output_from_pipeline/meta_file_tracker.csv',
+    default='/ifs/loni/faculty/hkim/shuting/code/output_from_pipeline/meta_file_tracker2.csv',
     help="Path to the CSV file containing subject information. Please check through '/ifs/loni/faculty/hkim/shuting/code/output_from_pipeline/meta_file_tracker.csv'."
 )
 parser.add_argument(
     "--time_book",
-    default="time_book.csv",
+    default="time_book2.csv",
     help="Path to save the log of processing times for each subject. Default is 'time_book.csv'."
 )
 parser.add_argument(
     "--output_dir",
     default="/ifs/loni/faculty/hkim/shuting/code/output_from_pipeline/",
-    help="Path to save the laplacians"
+    help="Path to save the laplacian fields"
+
+)
+parser.add_argument(
+    "--laplacian_dir_name",
+    default="laplacian/",
+    help="Path to save the laplacian fields"
+
 )
 
 # Parse arguments
 args = parser.parse_args()
-output_path = args.output_dir + "laplacian/"
+output_path = args.output_dir + args.laplacian_dir_name
 subjects = pd.read_csv(args.meta)
 row = subjects[subjects["subject_id"] == args.sample]
 
@@ -64,7 +71,7 @@ try:
     unique_labels_in = np.unique(seg_in)  # seg_in: the T2 data saved in Numpy obj
     counts = {label: np.sum(seg_in == label) for label in unique_labels_in}  # count voxels for each pas
     counts_df = pd.DataFrame(list(counts.items()), columns=["PAS index", "voxel count"])
-    counts_df.to_csv(args.output_dir + "voxel_count_per_pas_" + sample + ".csv", index=False)  # output counts
+    counts_df.to_csv(args.output_dir+"voxel_counts/" + "voxel_count_per_pas_" + sample + ".csv", index=False)  # output counts
 
     # keep PASs larger than 4-voxels
     counts_df = counts_df[counts_df["PAS index"] != 0]
@@ -84,5 +91,5 @@ try:
 except Exception as e:
     # Handle errors and log them
     with open(args.output_dir + args.time_book, "a") as file:
-        file.write(str(args.sample) + ",-," + "success\n")
+        file.write(str(args.sample) + ",-," + "fail\n")
     print(f"Error processing subject {args.sample}: {e}")
