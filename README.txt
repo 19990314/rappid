@@ -1,5 +1,15 @@
-This is the README file for the RAPPIT project
+#RAPPIT project
 
+##conda env
+It has been packed into laplacian.yml
+You can set it up using: conda env create -f laplacian.yml
+
+##pipline order
+run_laplacian.sh -> [meta_info_generator.py, single_laplacian.sh]
+single_laplacian.sh -> laplacian_caller.py -> laplacian_calculator.py
+laplacian_calculator.py
+
+##scripts
 run_laplacian.sh:
 the mission control center distributing tasks:
 Step 0: Assigning global variables
